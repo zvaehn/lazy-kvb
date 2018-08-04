@@ -1,0 +1,23 @@
+<h2>Übersicht der Aufzüge- und Rolltreppenstörungen</h2>
+
+<ul>
+  <li v-for="elevator in elevators">
+    <strong>{{ elevator.properties.Bezeichnung }}</strong>
+    {{ elevator.properties.Haltestellenbereich }}
+    (<small>{{ elevator.properties.timestamp }}</small>)
+  </li>
+</ul>
+
+<div class="gmap"></div>
+
+<script src="https://momentjs.com/downloads/moment.js"></script>
+<script src="/app/index.js"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBGoQppKA6zpe635LYTPjl_-J4BVHEoTfM&callback=initMap"></script>
+<script>
+  function initMap() {
+    var mapnode = document.querySelector('.gmap');
+    var cologne = { lat: 50.9471066, lng: 6.9571989 };
+    var map = new google.maps.Map(mapnode, { zoom: 12, center: cologne });
+    var marker = new google.maps.Marker({ position: cologne, map: map });
+  }
+</script>

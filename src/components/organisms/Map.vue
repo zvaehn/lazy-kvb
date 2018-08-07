@@ -1,11 +1,13 @@
 <template>
-  <div class="map" :id="mapName"></div>
+  <div>
+    <div class="map" :id="mapName"></div>
+  </div>
 </template>
 
 <script>
 export default {
   name: 'Map',
-  data: function () {
+  data() {
     return {
       mapName: this.name + "-map",
       map: null,
@@ -19,6 +21,9 @@ export default {
     },
     markers: {
       type: Array
+    },
+    infowindows: {
+      type: Array
     }
   },
   created: function() {
@@ -31,17 +36,34 @@ export default {
     const cologne = { lat: 50.9471066, lng: 6.9571989 };
 
     const options = {
+      zoom: 10,
       center: new google.maps.LatLng(cologne.lat, cologne.lng)
     }
 
     this.map = new google.maps.Map(element, options);
 
+    console.log(this.markers);
+
     this.markers.forEach((el) => {
       const coords = el.geometry.coordinates;
-      const position = new google.maps.LatLng(coords[0], coords[1]);
+      const properties = el.properties;
+      const position = new google.maps.LatLng(coords[1], coords[0]);
       const marker = new google.maps.Marker({
         position,
         map: this.map
+      });
+
+      // const dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+      // const date = dateFormat.parse(properties.timestamp);//You will get date object relative to server/client timezone wherever it is parsed
+      // const formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //If you need time just put specific format for time like 'HH:mm:ss'
+      // const prettyTime = formatter.format(date);
+
+      const infowindow = new google.maps.InfoWindow({
+        content: "<strong>" + el.category + "</strong><br>" + properties.Bezeichnung
+      });
+
+      marker.addListener('click', function() {
+        infowindow.open(this.map, this);
       });
 
       this.markers.push(marker);

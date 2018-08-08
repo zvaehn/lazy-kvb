@@ -2,16 +2,16 @@
   <div class="page-home">
     <h1 class="headline">{{ title }}</h1>
 
-    <div>Home.vue markers: {{ this.filteredMarkers.length }}</div>
+    <p>Es liegen zur Zeit <strong>{{ this.markers.length }}</strong> Störungen vor.</p>
 
-    Filter:
-    <select v-model="selectedCategory">
-      <option v-for="category in this.categories" v-bind:value="category.value">
-        {{ category.text }}
-      </option>
-    </select>
-
-    <span> ({{ this.selectedCategory }})</span>
+    <p>
+      Störung filtern nach:
+      <select v-model="selectedCategory">
+        <option v-for="category in this.categories" v-bind:value="category.value">
+          {{ category.text }}
+        </option>
+      </select>
+    </p>
 
     <Map name="incident" :markers="this.filteredMarkers"></Map>
   </div>
@@ -25,7 +25,7 @@ export default {
   name: 'Home',
   data() {
     return {
-      title: 'Home',
+      title: 'Übersicht der KVB Aufzugs- und Rolltreppenstörungen in Köln',
       markers: [],
       categories: [],
       category: false
@@ -34,9 +34,6 @@ export default {
   components: {
     Map: () => {
       return new Promise((resolve, reject) => {
-
-        // TODO: check if script already loaded.
-
         let script = document.createElement("script")
         script.onload = () => {
           resolve(Map);
@@ -45,10 +42,9 @@ export default {
         script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBGoQppKA6zpe635LYTPjl_-J4BVHEoTfM";
         document.head.appendChild(script)
       })
-     }
-    // Map,
+    }
   },
-  async created() {
+  created() {
     this.categories = [
       {
         value: false,
@@ -66,6 +62,8 @@ export default {
 
     this.category = this.categories[0].value;
     this.markers = [];
+  },
+  mounted() {
     this.getMarkers();
   },
   computed: {

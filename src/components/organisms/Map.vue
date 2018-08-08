@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div>Map.vue markers: {{ this.getMarkers.length }} </div>
+    <p v-if="this.$parent.selectedCategory !== false">Es werden <strong>{{ this.getMarkers.length }}</strong> gefilterte Störungen auf der Karte angezeigt.</p>
+    <p v-else>Es werden <strong>{{ this.getMarkers.length }}</strong> Störungen auf der Karte angezeigt.</p>
+
     <div class="map" :id="mapName"></div>
   </div>
 </template>
@@ -73,8 +75,6 @@ export default {
         const icon = {
           url: icons[el.category.value].icon,
           scaledSize: new google.maps.Size(40, 64),
-          // origin: new google.maps.Point(0,0),
-          // anchor: new google.maps.Point(0,0)
         };
 
         const marker = new google.maps.Marker({
@@ -83,13 +83,9 @@ export default {
           map: this.map
         });
 
-        // const dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-        // const date = dateFormat.parse(properties.timestamp);//You will get date object relative to server/client timezone wherever it is parsed
-        // const formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //If you need time just put specific format for time like 'HH:mm:ss'
-        // const prettyTime = formatter.format(date);
         let content = "<strong>" + el.category.text + "</strong><br>";
         content += properties.Bezeichnung + "<br><br>";
-        content += "<small>" + properties.timestamp + "</small>";
+        content += "<small>Letzte Aktuslisierung " + this.$moment(properties.timestamp).fromNow() + "</small>";
 
         const infowindow = new google.maps.InfoWindow({
           content: content
@@ -105,7 +101,8 @@ export default {
 
         this.mapMarkers.push(marker);
         this.bounds.extend(position);
-        return;
+
+        return; // remove me and i'll get stuck in an endless-loop
 
         this.map.fitBounds(this.bounds);
       });
@@ -115,7 +112,7 @@ export default {
 
   },
   created: function() {
-    // component created
+
   },
   mounted: function () {
     this.bounds = new google.maps.LatLngBounds();
@@ -129,6 +126,8 @@ export default {
     }
 
     this.map = new google.maps.Map(element, options);
+
+    this.getMarkers;
   }
 };
 </script>

@@ -3,6 +3,7 @@
 import Vue from 'vue';
 import App from './App';
 import router from './router';
+import moment from 'moment';
 
 Vue.config.productionTip = false;
 
@@ -13,3 +14,11 @@ new Vue({
   components: { App },
   template: '<App/>',
 });
+
+
+moment.locale('de');
+Vue.prototype.$moment = moment;
+
+
+// Better way, but doesnt work
+// Object.definePrototype(Vue.prototype, '$moment', { value: moment });

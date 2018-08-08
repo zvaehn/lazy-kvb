@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div>Map.vue markers: {{ this.getMarkers.length }} </div>
     <div class="map" :id="mapName"></div>
   </div>
 </template>
@@ -11,7 +12,9 @@ export default {
     return {
       mapName: this.name + "-map",
       map: null,
-      bounds: null
+      bounds: null,
+      mapMarkers: [],
+      infowindows: []
     }
   },
   props: {
@@ -20,14 +23,92 @@ export default {
       required: true
     },
     markers: {
-      type: Array
-    },
-    infowindows: {
-      type: Array
+      type: Array,
+      default: []
     }
   },
-  created: function() {
+  computed: {
+    getMarkers: function () {
+      if(this.markers.length) {
+        this.updateMap();
+      }
 
+      return this.markers;
+    }
+  },
+  methods: {
+    cleanMarker: function() {
+      this.mapMarkers = this.mapMarkers.map(marker => {
+        marker.setMap(null);
+        return marker;
+      });
+    },
+    updateMap: function() {
+      if(!this.map) return;
+
+      this.cleanMarker();
+
+      this.markers.forEach((el) => {
+        if(!el.geometry) return;
+
+        const coords = el.geometry.coordinates;
+        const properties = el.properties;
+        const position = new google.maps.LatLng(coords[1], coords[0]);
+
+        const iconBase = './static/icons/';
+        const icons = {
+          elevator: {
+            icon: iconBase + 'marker-elevator-colored.png'
+          },
+          escalator: {
+            icon: iconBase + 'marker-escalator-colored.png'
+          },
+        };
+
+        const icon = {
+          url: icons[el.category.value].icon,
+          scaledSize: new google.maps.Size(40, 64),
+          // origin: new google.maps.Point(0,0),
+          // anchor: new google.maps.Point(0,0)
+        };
+
+        const marker = new google.maps.Marker({
+          position: position,
+          icon: icon,
+          map: this.map
+        });
+
+        // const dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        // const date = dateFormat.parse(properties.timestamp);//You will get date object relative to server/client timezone wherever it is parsed
+        // const formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //If you need time just put specific format for time like 'HH:mm:ss'
+        // const prettyTime = formatter.format(date);
+        let content = "<strong>" + el.category.text + "</strong><br>";
+        content += properties.Bezeichnung + "<br><br>";
+        content += "<small>" + properties.timestamp + "</small>";
+
+        const infowindow = new google.maps.InfoWindow({
+          content: content
+        });
+
+        marker.addListener('click', function() {
+          infowindow.open(this.map, this);
+        });
+
+        this.mapMarkers.push(marker);
+        this.map.center = marker.position;
+
+        this.bounds.extend(position);
+        return;
+
+        this.map.fitBounds(this.bounds);
+      });
+    }
+  },
+  beforeUpdate: function() {
+
+  },
+  created: function() {
+    // component created
   },
   mounted: function () {
     this.bounds = new google.maps.LatLngBounds();
@@ -36,39 +117,11 @@ export default {
     const cologne = { lat: 50.9471066, lng: 6.9571989 };
 
     const options = {
-      zoom: 10,
+      zoom: 14,
       center: new google.maps.LatLng(cologne.lat, cologne.lng)
     }
 
     this.map = new google.maps.Map(element, options);
-
-    console.log(this.markers);
-
-    this.markers.forEach((el) => {
-      const coords = el.geometry.coordinates;
-      const properties = el.properties;
-      const position = new google.maps.LatLng(coords[1], coords[0]);
-      const marker = new google.maps.Marker({
-        position,
-        map: this.map
-      });
-
-      // const dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
-      // const date = dateFormat.parse(properties.timestamp);//You will get date object relative to server/client timezone wherever it is parsed
-      // const formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //If you need time just put specific format for time like 'HH:mm:ss'
-      // const prettyTime = formatter.format(date);
-
-      const infowindow = new google.maps.InfoWindow({
-        content: "<strong>" + el.category + "</strong><br>" + properties.Bezeichnung
-      });
-
-      marker.addListener('click', function() {
-        infowindow.open(this.map, this);
-      });
-
-      this.markers.push(marker);
-      this.map.fitBounds(this.bounds.extend(position));
-    });
   }
 };
 </script>

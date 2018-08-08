@@ -43,6 +43,11 @@ export default {
         return marker;
       });
     },
+    cleanInfowindows: function() {
+      this.infowindows.forEach((el) => {
+        el.close();
+      });
+    },
     updateMap: function() {
       if(!this.map) return;
 
@@ -90,13 +95,15 @@ export default {
           content: content
         });
 
+        this.infowindows.push(infowindow);
+        let that = this;
+
         marker.addListener('click', function() {
+          that.cleanInfowindows();
           infowindow.open(this.map, this);
         });
 
         this.mapMarkers.push(marker);
-        this.map.center = marker.position;
-
         this.bounds.extend(position);
         return;
 

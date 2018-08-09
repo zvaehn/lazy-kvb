@@ -1,19 +1,22 @@
 <template>
   <div>
-    <p v-if="this.$parent.selectedCategory !== false">Es werden <strong>{{ this.getMarkers.length }}</strong> gefilterte Störungen auf der Karte angezeigt.</p>
-    <p v-else>Es werden <strong>{{ this.getMarkers.length }}</strong> Störungen auf der Karte angezeigt.</p>
+    <!-- <p v-if="this.$parent.selectedCategory !== false">Es werden <strong>{{ this.getMarkers.length }}</strong> gefilterte Störungen auf der Karte angezeigt.</p>
+    <p v-else>Es werden <strong>{{ this.getMarkers.length }}</strong> Störungen auf der Karte angezeigt.</p> -->
 
     <div class="map" :id="mapName"></div>
   </div>
 </template>
 
 <script>
+require('gmaps-marker-clusterer');
+
 export default {
   name: 'Map',
   data() {
     return {
       mapName: this.name + "-map",
       map: null,
+      markerCluster: null,
       bounds: null,
       mapMarkers: [],
       infowindows: []
@@ -29,14 +32,22 @@ export default {
       default: []
     }
   },
-  computed: {
-    getMarkers: function () {
-      if(this.markers.length) {
-        this.updateMap();
-      }
-
+  watch: {
+    markers: function() {
+      this.updateMap();
       return this.markers;
     }
+  },
+  computed: {
+    // getMarkers: function () {
+    //   console.log("computed prop. getMarkers called.");
+    //
+    //   if(this.markers.length) {
+    //     // this.updateMap();
+    //   }
+    //
+    //   return this.markers;
+    // }
   },
   methods: {
     cleanMarker: function() {
@@ -54,6 +65,9 @@ export default {
       if(!this.map) return;
 
       this.cleanMarker();
+
+      this.mapMarkers = [];
+      this.markerCluster.clearMarkers();
 
       this.markers.forEach((el) => {
         if(!el.geometry) return;
@@ -101,10 +115,11 @@ export default {
 
         this.mapMarkers.push(marker);
         this.bounds.extend(position);
-
-        return; // remove me and i'll get stuck in an endless-loop
-
         this.map.fitBounds(this.bounds);
+
+        if(this.markerCluster) {
+          this.markerCluster.addMarker(marker);
+        }
       });
     }
   },
@@ -115,19 +130,35 @@ export default {
 
   },
   mounted: function () {
+    let that = this;
     this.bounds = new google.maps.LatLngBounds();
 
     const element = document.getElementById(this.mapName);
     const cologne = { lat: 50.9471066, lng: 6.9571989 };
 
     const options = {
-      zoom: 14,
+      zoom: 13,
       center: new google.maps.LatLng(cologne.lat, cologne.lng)
     }
 
     this.map = new google.maps.Map(element, options);
 
     this.getMarkers;
+
+    let mcOptions = {
+      gridSize: 50,
+      styles: [
+        {
+          textColor: '#761412',
+          url: 'static/icons/marker-cluster.png',
+          height: 66,
+          width: 65
+        }
+      ],
+      maxZoom: 15
+    };
+
+    this.markerCluster = new MarkerClusterer(this.map, this.mapMarkers, mcOptions);
   }
 };
 </script>

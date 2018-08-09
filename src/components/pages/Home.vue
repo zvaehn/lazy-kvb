@@ -39,7 +39,7 @@ export default {
           resolve(Map);
         }
         script.async = true;
-        script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBGoQppKA6zpe635LYTPjl_-J4BVHEoTfM";
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.GMAPS_API_KEY}`;
         document.head.appendChild(script)
       })
     }

@@ -12,9 +12,8 @@ const cologneAPI = {
   },
   getElevators() {
     return new Promise ((resolve, reject) => {
-      // const url = 'https://api.myjson.com/bins/zz494';
       // const url = 'http://online-service.kvb-koeln.de/geoserver/OPENDATA/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=ODENDATA%3Afahrtreppen_gestoert&outputFormat=application/json';
-      const url = "https://lazykvb.local/cologne-api.php?feature=elevators";
+      const url = `${process.env.API_SCRIPT}?feature=elevators`;
 
       this.request('GET', url)
         .then((response) => {
@@ -30,7 +29,7 @@ const cologneAPI = {
   getEscalators() {
     return new Promise ((resolve, reject) => {
       // const url = 'http://online-service.kvb-koeln.de/geoserver/OPENDATA/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=ODENDATA%3Afahrtreppen_gestoert&outputFormat=application/json';
-      const url = "https://lazykvb.local/cologne-api.php?feature=escalators";
+      const url = `${process.env.API_SCRIPT}?feature=escalators`;
 
       this.request('GET', url)
         .then((response) => {
